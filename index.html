@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Изображения котов</title>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <script src="./script.js" defer></script>
+    <style>
+        .cat-image {
+            width: 100%;
+            height: 350px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .btn-refresh {
+            margin-top: 20px;
+        }
+        
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center">Изображения котов</h1>
+    <div class="search-bar text-center">
+        <input type="text" id="search-input" class="form-control" placeholder="Поиск по имени кота">
+    </div>
+    <button id="refresh-button" class="btn btn-primary btn-refresh">Загрузить новые изображения</button>
+    <div class="row" id="cat-gallery"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const catGallery = document.getElementById('cat-gallery');
+        const searchInput = document.getElementById('search-input');
+        const refreshButton = document.getElementById('refresh-button');
+        let catData = []; // Изначально пустой массив
+
+        // Массив имен котов
+        const catNames = [
+            'Васька', 'Мурзик', 'Барсик', 'Рыжик', 'Кузя', 'Снежок', 'Маруся', 'Багира', 'Люся'
+        ];
+
+        function renderCats(cats) {
+            catGallery.innerHTML = ''; // Очистка галереи
+            cats.forEach(cat => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4';
+                col.innerHTML = `
+                    <div class="card">
+                        <img src="${cat.url}" alt="${cat.name}" class="card-img-top cat-image">
+                        <div class="card-body">
+                            <h5 class="card-title">${cat.name}</h5>
+                        </div>
+                    </div>
+                `;
+                catGallery.appendChild(col);
+            });
+        }
+
+        function filterCats() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredCats = catData.filter(cat => 
+                cat.name.toLowerCase().includes(searchTerm)
+            );
+            renderCats(filteredCats);
+        }
+        
+
+        function fetchCatData() {
+            // Пример API для загрузки изображений котов (можно заменить на нужный вам API)
+            fetch('https://api.thecatapi.com/v1/images/search?limit=9')
+                .then(response => response.json())
+                .then(data => {
+                    // Преобразование данных для использования
+                    catData = data.map((cat, index) => ({
+                        id: cat.id,
+                        url: cat.url,
+                        name: catNames[index % catNames.length] // Присваиваем имя из массива
+                    }));
+                    renderCats(catData);
+                })
+                .catch(error => console.error('Ошибка загрузки данных:', error));
+        }
+
+        // Изначально загружаем данные
+        fetchCatData();
+
+        // Добавляем обработчик события ввода в поле поиска
+        searchInput.addEventListener('input', filterCats);
+
+        // Добавляем обработчик события клика на кнопку
+        refreshButton.addEventListener('click', fetchCatData);
+    });
+</script>
+
+</body>
+</html>
